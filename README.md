@@ -65,9 +65,9 @@ ${POSE_ROOT}
             |-- 000001163.jpg
             |-- 000003072.jpg
 ```
-
-4. Follow the steps laid out in the HRNet_setup notebook file we provide. It takes care of the necessary bugfixes that we encountered in adapting the original HRNet code for our purpose.
-5. Enjoy! For visualizing results also consult the HRNet_setup file.
+4. In the experiments/satellite folder create your own config yaml file. The values to be changed are annotated in the template.yaml file.
+5. Follow the steps laid out in the HRNet_setup notebook file we provide. It takes care of the necessary bugfixes that we encountered in adapting the original HRNet code for our purpose.
+6. Enjoy! For training and visualization see below. You can also consult the HRNet_setup file.
 
 ### Installation (Own Hardware)
 1. Install pytorch >= v1.0.0 following [official instruction](https://pytorch.org/).
