@@ -180,12 +180,12 @@ def main():
     )
 
     for epoch in range(begin_epoch, cfg.TRAIN.END_EPOCH):
-        lr_scheduler.step()
+        #lr_scheduler.step() ORIGINAL POSITION
 
         # train for one epoch
         train(cfg, train_loader, model, criterion, optimizer, epoch,
               final_output_dir, tb_log_dir, writer_dict)
-
+        lr_scheduler.step()#CHANGED POSITION BECAUSE OF PYTORCH WARNING, MARIUS
 
         # evaluate on validation set
         perf_indicator = validate(

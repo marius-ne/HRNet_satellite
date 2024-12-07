@@ -63,11 +63,14 @@ _C.DATASET.SELECT_DATA = False
 
 # training data augmentation
 _C.DATASET.FLIP = True
+_C.DATASET.SHIFT = True #MODIFIED, added this, for data augmentation
 _C.DATASET.SCALE_FACTOR = 0.25
 _C.DATASET.ROT_FACTOR = 30
 _C.DATASET.PROB_HALF_BODY = 0.0
 _C.DATASET.NUM_JOINTS_HALF_BODY = 8
 _C.DATASET.COLOR_RGB = False
+_C.DATASET.FLIP_PAIRS = [] #MODIFIED, added this
+_C.DATASET.DATASET_JOINTS = [] #MODIFIED, added this, keypoint names in right order
 
 # train
 _C.TRAIN = CN()
@@ -91,6 +94,16 @@ _C.TRAIN.CHECKPOINT = ''
 
 _C.TRAIN.BATCH_SIZE_PER_GPU = 32
 _C.TRAIN.SHUFFLE = True
+
+_C.TRAIN.WARMUP: True
+_C.TRAIN.WARMUP_EPOCHS: 5
+_C.TRAIN.WARMUP_START_LR: 0.00001
+_C.TRAIN.LR_SCHEDULER: 'cosine'
+_C.TRAIN.MIN_LR: 0.00001
+_C.TRAIN.DROPOUT_RATE: 0.2
+_C.TRAIN.LABEL_SMOOTHING: 0.1
+_C.TRAIN.EARLY_STOPPING: True
+_C.TRAIN.EARLY_STOPPING_PATIENCE: 10 
 
 # testing
 _C.TEST = CN()
@@ -124,6 +137,7 @@ _C.DEBUG.SAVE_HEATMAPS_PRED = False
 
 
 def update_config(cfg, args):
+    cfg.set_new_allowed(True) #added
     cfg.defrost()
     cfg.merge_from_file(args.cfg)
     cfg.merge_from_list(args.opts)

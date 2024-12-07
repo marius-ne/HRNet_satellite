@@ -42,6 +42,7 @@ class JointsDataset(Dataset):
         self.scale_factor = cfg.DATASET.SCALE_FACTOR
         self.rotation_factor = cfg.DATASET.ROT_FACTOR
         self.flip = cfg.DATASET.FLIP
+        self.shift = cfg.DATASET.SHIFT  # We add random shifts around center for data augmentation
         self.num_joints_half_body = cfg.DATASET.NUM_JOINTS_HALF_BODY
         self.prob_half_body = cfg.DATASET.PROB_HALF_BODY
         self.color_rgb = cfg.DATASET.COLOR_RGB
@@ -142,6 +143,7 @@ class JointsDataset(Dataset):
         score = db_rec['score'] if 'score' in db_rec else 1
         r = 0
 
+        shiftArray = np.array([0,0], dtype=np.float32) 
         if self.is_train:
             if (np.sum(joints_vis[:, 0]) > self.num_joints_half_body
                 and np.random.rand() < self.prob_half_body):
@@ -163,8 +165,15 @@ class JointsDataset(Dataset):
                 joints, joints_vis = fliplr_joints(
                     joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
                 c[0] = data_numpy.shape[1] - c[0] - 1
+               
+            
+            # We also add random shifts for data augmentation
+            if self.shift and random.random() <= 0.5:
+                shiftx = np.random.normal(0,0.125) #1-sigma 12.5% shift of bounding box width/height
+                shifty = np.random.normal(0,0.125)
+                shiftArray = np.array([shiftx,shifty], dtype=np.float32)
 
-        trans = get_affine_transform(c, s, r, self.image_size)
+        trans = get_affine_transform(c, s, r, self.image_size, shift=shiftArray)
         input = cv2.warpAffine(
             data_numpy,
             trans,
