@@ -1,75 +1,200 @@
-# Inference hrnet
+# Adaptation of Deep High-Resolution Representation Learning for Satellite Pose Estimation
+## News
+- [2024/11/28] In the frame of a project at ESA we create this repository to serve as a reference for future HRNet for satellite pose estimation applications.
 
-Inferencing the deep-high-resolution-net.pytoch without using Docker. 
+## Introduction
+This is an adaptation of the official repository of HRNet. For the [original repository](https://github.com/leoxiaobin/deep-high-resolution-net.pytorch) and its [paper](https://arxiv.org/abs/1902.09212) see here. 
+In this work, the original authors were interested in human pose estimation and produced state-of-the-art results for this task. They relied on high-to-low resolution network architecture. This has been succesfully employed by the winning team of the 2019 Kelvins Pose Estimation Challenge of the ESA Advanced Concepts Team and the Stanford Space Rendezvous Laboratory (here their paper: [Satellite Pose Estimation with Deep Landmark Regressionand Nonlinear Pose Reﬁnement](https://arxiv.org/abs/1908.11542)).
 
-## Prep
-1. Download the researchers' pretrained pose estimator from [google drive](https://drive.google.com/drive/folders/1hOTihvbyIxsm5ygDpbUuJ7O_tzv4oXjC?usp=sharing) to this directory under `models/`
-2. Put the video file you'd like to infer on in this directory under `videos`
-3. (OPTIONAL) build the docker container in this directory with `./build-docker.sh` (this can take time because it involves compiling opencv)
-4. update the `inference-config.yaml` file to reflect the number of GPUs you have available and which trained model you want to use.
+The goal of this repository is also to offer a general reference for others who want to adapt HRNet to the space use-case. Below we describe how you are able to add your own dataset and how to use our previously created dataset loading scripts and configuration files to easily run them with your data.
 
-## Running the Model
-### 1. Running on the video
+For our datasets we followed the mpii format and the tutorial we provide for your own datasets follows mpii as well.
+
+![Illustrating the architecture of the proposed HRNet](/figures/hrnet.png)
+## Main Results
+### Results on AIRBUS MAN DATA L2
+| Arch               | Head | Shoulder | Elbow | Wrist |  Hip | Knee | Ankle | Mean | Mean@0.1 |
+|--------------------|------|----------|-------|-------|------|------|-------|------|----------|
+| pose_resnet_50     | 96.4 |     95.3 |  89.0 |  83.2 | 88.4 | 84.0 |  79.6 | 88.5 |     34.0 |
+| pose_resnet_101    | 96.9 |     95.9 |  89.5 |  84.4 | 88.4 | 84.5 |  80.7 | 89.1 |     34.0 |
+| pose_resnet_152    | 97.0 |     95.9 |  90.0 |  85.0 | 89.2 | 85.3 |  81.3 | 89.6 |     35.0 |
+| **pose_hrnet_w32** | 97.1 |     95.9 |  90.3 |  86.4 | 89.1 | 87.1 |  83.3 | 90.3 |     37.7 |
+
+### Note:
+- Flip test is used.
+- Input size is 256x256
+- pose_resnet_[50,101,152] is our previous work of [*Simple Baselines for Human Pose Estimation and Tracking*](http://openaccess.thecvf.com/content_ECCV_2018/html/Bin_Xiao_Simple_Baselines_for_ECCV_2018_paper.html)
+
+
+## Environment
+The code is developed using python 3.6 on Ubuntu 16.04. NVIDIA GPUs are needed. We ran this using Google Colab Pro with the A100 runtime.
+
+## Quick start
+We strongly suggest using our code with Google Colab. We also provide general guidelines for the use with your own hardware but be aware that this has *not been tested* by us beforehand. 
+### Installation (Google Colab)
+1. Clone this repository in your Google Drive and mount it in your Google Colab instance. For reference see [here](https://stackoverflow.com/questions/67553747/how-do-i-link-a-github-repository-to-a-google-colab-notebook).
+2. Download pretrained models from original model zoo([GoogleDrive](https://drive.google.com/drive/folders/1hOTihvbyIxsm5ygDpbUuJ7O_tzv4oXjC?usp=sharing) or [OneDrive](https://1drv.ms/f/s!AhIXJn_J-blW231MH2krnmLq5kkQ)).
+   You will only need the mpii models.
+   ```
+   ${POSE_ROOT}
+    `-- models
+        `-- pytorch
+            `-- pose_mpii
+                |-- pose_hrnet_w32_256x256.pth
+                |-- pose_hrnet_w48_256x256.pth
+                |-- pose_resnet_101_256x256.pth
+                |-- pose_resnet_152_256x256.pth
+                `-- pose_resnet_50_256x256.pth
+
+   ``` 
+3. Data preparation
+**For your own data**, you need an image folder, a set of .json files with annotations for training, testing and validation and a Ground Truth file for evaluation. A set of Matlab scripts for creating these can be found here: [TBD](https://TBD.com)
+**For AIRBUS ESA data**, please download from [TBD](http://human-pose.mpi-inf.mpg.de/). The original annotation files are in matlab format. We have converted them into json format, you also need to download them from [OneDrive](https://1drv.ms/f/s!AhIXJn_J-blW00SqrairNetmeVu4) or [GoogleDrive](https://drive.google.com/drive/folders/1En_VqmStnsXMdldXA6qpqEyDQulnmS3a?usp=sharing).
+Extract them under {POSE_ROOT}/data, and make them look like this:
 ```
-python demo/inference.py --cfg demo/inference-config.yaml \
-    --videoFile ../../multi_people.mp4 \
-    --writeBoxFrames \
-    --outputDir output \
-    TEST.MODEL_FILE ../models/pytorch/pose_coco/pose_hrnet_w32_256x192.pth 
+${POSE_ROOT}
+|-- data
+`-- |-- mpii
+    `-- |-- annot
+        |   |-- gt_valid.mat
+        |   |-- test.json
+        |   |-- train.json
+        |   |-- trainval.json
+        |   `-- valid.json
+        `-- images
+            |-- 000001163.jpg
+            |-- 000003072.jpg
+```
+4. In the experiments/satellite folder create your own config yaml file. The values to be changed are annotated in the template.yaml file.
+5. Follow the steps laid out in the HRNet_setup notebook file we provide. It takes care of the necessary bugfixes that we encountered in adapting the original HRNet code for our purpose.
+6. Enjoy! For training and visualization see below. You can also consult the HRNet_setup file.
+
+### Installation (Own Hardware)
+1. Install pytorch >= v1.0.0 following [official instruction](https://pytorch.org/).
+   **Note that if you use pytorch's version < v1.0.0, you should following the instruction at <https://github.com/Microsoft/human-pose-estimation.pytorch> to disable cudnn's implementations of BatchNorm layer. We encourage you to use higher pytorch's version(>=v1.0.0)**
+2. Clone this repo, and we'll call the directory that you cloned as ${POSE_ROOT}.
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+4. Make libs:
+   ```
+   cd ${POSE_ROOT}/lib
+   make
+   ```
+5. Install [COCOAPI](https://github.com/cocodataset/cocoapi):
+   ```
+   # COCOAPI=/path/to/clone/cocoapi
+   git clone https://github.com/cocodataset/cocoapi.git $COCOAPI
+   cd $COCOAPI/PythonAPI
+   # Install into global site-packages
+   make install
+   # Alternatively, if you do not have permissions or prefer
+   # not to install the COCO API into global site-packages
+   python3 setup.py install --user
+   ```
+   Note that instructions like # COCOAPI=/path/to/install/cocoapi indicate that you should pick a path where you'd like to have the software cloned and then set an environment variable (COCOAPI in this case) accordingly.
+4. Init output(training model output directory) and log(tensorboard log directory) directory:
+
+   ```
+   mkdir output 
+   mkdir log
+   ```
+
+   Your directory tree should look like this:
+
+   ```
+   ${POSE_ROOT}
+   ├── data
+   ├── experiments
+   ├── lib
+   ├── log
+   ├── models
+   ├── output
+   ├── tools 
+   ├── README.md
+   └── requirements.txt
+   ```
+
+
+
+### Training and Testing
+
+#### Testing on MPII dataset using model zoo's models([GoogleDrive](https://drive.google.com/drive/folders/1hOTihvbyIxsm5ygDpbUuJ7O_tzv4oXjC?usp=sharing) or [OneDrive](https://1drv.ms/f/s!AhIXJn_J-blW231MH2krnmLq5kkQ))
+ 
+
+```
+python tools/test.py \
+    --cfg experiments/mpii/hrnet/w32_256x256_adam_lr1e-3.yaml \
+    TEST.MODEL_FILE models/pytorch/pose_mpii/pose_hrnet_w32_256x256.pth
+```
+
+#### Training on MPII dataset
+
+```
+python tools/train.py \
+    --cfg experiments/mpii/hrnet/w32_256x256_adam_lr1e-3.yaml
+```
+
+#### Testing on COCO val2017 dataset using model zoo's models([GoogleDrive](https://drive.google.com/drive/folders/1hOTihvbyIxsm5ygDpbUuJ7O_tzv4oXjC?usp=sharing) or [OneDrive](https://1drv.ms/f/s!AhIXJn_J-blW231MH2krnmLq5kkQ))
+ 
+
+```
+python tools/test.py \
+    --cfg experiments/coco/hrnet/w32_256x192_adam_lr1e-3.yaml \
+    TEST.MODEL_FILE models/pytorch/pose_coco/pose_hrnet_w32_256x192.pth \
+    TEST.USE_GT_BBOX False
+```
+
+#### Training on COCO train2017 dataset
+
+```
+python tools/train.py \
+    --cfg experiments/coco/hrnet/w32_256x192_adam_lr1e-3.yaml \
+```
+
+### Visualization
+
+#### Visualizing predictions on COCO val
+
+```
+python visualization/plot_coco.py \
+    --prediction output/coco/w48_384x288_adam_lr1e-3/results/keypoints_val2017_results_0.json \
+    --save-path visualization/results
 
 ```
 
-The above command will create a video under *output* directory and a lot of pose image under *output/pose* directory. 
-Even with usage of GPU (GTX1080 in my case), the person detection will take nearly **0.06 sec**, the person pose match will
- take nearly **0.07 sec**. In total. inference time per frame will be **0.13 sec**, nearly 10fps. So if you prefer a real-time (fps >= 20) 
- pose estimation then you should try other approach.
 
-**===Result===**
+<img src="figures\visualization\coco\score_610_id_2685_000000002685.png" height="215"><img src="figures\visualization\coco\score_710_id_153229_000000153229.png" height="215"><img src="figures\visualization\coco\score_755_id_343561_000000343561.png" height="215">
 
-Some output images are as:
+<img src="figures\visualization\coco\score_755_id_559842_000000559842.png" height="209"><img src="figures\visualization\coco\score_770_id_6954_000000006954.png" height="209"><img src="figures\visualization\coco\score_919_id_53626_000000053626.png" height="209">
 
-![1 person](inference_1.jpg)
-Fig: 1 person inference
+### Other applications
+Many other dense prediction tasks, such as segmentation, face alignment and object detection, etc. have been benefited by HRNet. More information can be found at [High-Resolution Networks](https://github.com/HRNet).
 
-![3 person](inference_3.jpg)
-Fig: 3 person inference
 
-![3 person](inference_5.jpg)
-Fig: 3 person inference
-
-### 2. Demo with more common functions
-Remember to update` TEST.MODEL_FILE` in `demo/inference-config.yaml `according to your model path.
-
-`demo.py` provides the following functions:
-
-- use `--webcam` when the input is a real-time camera.
-- use `--video [video-path]`  when the input is a video.
-- use `--image [image-path]` when the input is an image.
-- use `--write` to save the image, camera or video result.
-- use `--showFps` to show the fps (this fps includes the detection part).
-- draw connections between joints.
-
-#### (1) the input is a real-time carema
-```python
-python demo/demo.py --webcam --showFps --write
+### Source
 ```
+@inproceedings{sun2019deep,
+  title={Deep High-Resolution Representation Learning for Human Pose Estimation},
+  author={Sun, Ke and Xiao, Bin and Liu, Dong and Wang, Jingdong},
+  booktitle={CVPR},
+  year={2019}
+}
 
-#### (2) the input is a video
-```python
-python demo/demo.py --video test.mp4 --showFps --write
+@inproceedings{xiao2018simple,
+    author={Xiao, Bin and Wu, Haiping and Wei, Yichen},
+    title={Simple Baselines for Human Pose Estimation and Tracking},
+    booktitle = {European Conference on Computer Vision (ECCV)},
+    year = {2018}
+}
+
+@article{WangSCJDZLMTWLX19,
+  title={Deep High-Resolution Representation Learning for Visual Recognition},
+  author={Jingdong Wang and Ke Sun and Tianheng Cheng and 
+          Borui Jiang and Chaorui Deng and Yang Zhao and Dong Liu and Yadong Mu and 
+          Mingkui Tan and Xinggang Wang and Wenyu Liu and Bin Xiao},
+  journal   = {TPAMI}
+  year={2019}
+}
 ```
-#### (3) the input is a image
-
-```python
-python demo/demo.py --image test.jpg --showFps --write
-```
-
-**===Result===**
-
-![show_fps](inference_6.jpg)
-
-Fig: show fps
-
-![multi-people](inference_7.jpg)
-
-Fig: multi-people

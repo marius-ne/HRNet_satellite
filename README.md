@@ -13,17 +13,15 @@ For our datasets we followed the mpii format and the tutorial we provide for you
 ![Illustrating the result for ENVISAT dataset](/figures/validationPredictionsEnvisat.jpg)
 ## Main Results
 ### Results on AIRBUS MAN DATA L2
-| Arch               | Head | Shoulder | Elbow | Wrist |  Hip | Knee | Ankle | Mean | Mean@0.1 |
-|--------------------|------|----------|-------|-------|------|------|-------|------|----------|
-| pose_resnet_50     | 96.4 |     95.3 |  89.0 |  83.2 | 88.4 | 84.0 |  79.6 | 88.5 |     34.0 |
-| pose_resnet_101    | 96.9 |     95.9 |  89.5 |  84.4 | 88.4 | 84.5 |  80.7 | 89.1 |     34.0 |
-| pose_resnet_152    | 97.0 |     95.9 |  90.0 |  85.0 | 89.2 | 85.3 |  81.3 | 89.6 |     35.0 |
-| **pose_hrnet_w32** | 97.1 |     95.9 |  90.3 |  86.4 | 89.1 | 87.1 |  83.3 | 90.3 |     37.7 |
+| Arch       | C+X-Y+Z | C-X-Y+Z | C-X+Y+Z | C+X+Y+Z | C+X-Y-Z | C-X-Y-Z | C-X+Y-Z | C+X+Y-Z | A+X-Y | A-X-Y   | A-X+Y  | A+X+Y  | PE+Z   | CROWN  |THRUSTER| PE-Z   | Mean   |Mean@0.01|
+|------------|---------|---------|---------|---------|---------|---------|---------|---------|-------|--------|--------|--------|--------|--------|--------|--------|--------|-------|
+| pose_hrnet | 99.358  | 99.944  | 99.541  | 99.377  | 99.649  | 100.000 | 99.788  | 99.947  | 99.906| 100.000 | 99.379 | 99.672 | 99.579 | 99.954 | 99.922 | 99.473 | 99.720 | 0.206   |
 
 ### Note:
 - Flip test is used.
-- Input size is 256x256
-- pose_resnet_[50,101,152] is our previous work of [*Simple Baselines for Human Pose Estimation and Tracking*](http://openaccess.thecvf.com/content_ECCV_2018/html/Bin_Xiao_Simple_Baselines_for_ECCV_2018_paper.html)
+- Input size is 256x256.
+- Half body transform is used.
+- Additional shifting data augmentation has been added. 
 
 
 ## Environment
