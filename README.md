@@ -13,9 +13,9 @@ For our datasets we followed the mpii format and the tutorial we provide for you
 ![Illustrating the result for ENVISAT dataset](/figures/validationPredictionsEnvisat.jpg)
 ## Main Results
 ### Results on AIRBUS MAN DATA L2
-| Arch       | C+X-Y+Z | C-X-Y+Z | C-X+Y+Z | C+X+Y+Z | C+X-Y-Z | C-X-Y-Z | C-X+Y-Z | C+X+Y-Z | A+X-Y | A-X-Y   | A-X+Y  | A+X+Y  | PE+Z   | CROWN  |THRUSTER| PE-Z   | Mean   |Mean@0.01|
-|------------|---------|---------|---------|---------|---------|---------|---------|---------|-------|--------|--------|--------|--------|--------|--------|--------|--------|-------|
-| pose_hrnet | 99.358  | 99.944  | 99.541  | 99.377  | 99.649  | 100.000 | 99.788  | 99.947  | 99.906| 100.000 | 99.379 | 99.672 | 99.579 | 99.954 | 99.922 | 99.473 | 99.720 | 0.206   |
+| Arch       | C+X-Y+Z | C-X-Y+Z | C-X+Y+Z | C+X+Y+Z | C+X-Y-Z | C-X-Y-Z | C-X+Y-Z | C+X+Y-Z | A+X-Y | \ A-X-Y   | A-X+Y  | A+X+Y  | PE+Z   | CROWN  |THRUSTER| PE-Z   | Mean   |Mean@0.01| \
+|------------|---------|---------|---------|---------|---------|---------|---------|---------|-------| \ --------|--------|--------|--------|--------|--------|--------|--------|-------| \
+| pose_hrnet | 99.358  | 99.944  | 99.541  | 99.377  | 99.649  | 100.000 | 99.788  | 99.947  | 99.906| \ 100.000 | 99.379 | 99.672 | 99.579 | 99.954 | 99.922 | 99.473 | 99.720 | 0.206   | \
 
 ### Note:
 - Flip test is used.
